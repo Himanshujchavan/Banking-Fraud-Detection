@@ -1,0 +1,275 @@
+/* ==========================================
+   GLOBAL RESET
+========================================== */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   ROOT VARIABLES
+========================================== */
+
+:root {
+
+  --bg: #081120;
+  --bg-secondary: #0f172a;
+
+  --card: #111827;
+
+  --border: #1e293b;
+
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --accent: #3b82f6;
+
+  --shadow:
+    0 10px 25px rgba(0,0,0,0.25);
+
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================
+   PAGE LAYOUT
+========================================== */
+
+html,
+body,
+#root {
+
+  min-height: 100vh;
+
+  width: 100%;
+
+  background: var(--bg);
+
+  color: var(--text);
+
+  overflow-x: hidden;
+}
+
+/* Remove the old Vite limitation */
+#root {
+
+  width: 100%;
+
+  max-width: 100%;
+
+  margin: 0;
+
+  padding: 0;
+
+  border: none;
+
+  background: var(--bg);
+}
+
+/* ==========================================
+   TYPOGRAPHY
+========================================== */
+
+body {
+
+  background: var(--bg);
+
+  color: var(--text);
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+
+  color: var(--text);
+
+  font-weight: 700;
+}
+
+p {
+
+  color: var(--text-secondary);
+}
+
+a {
+
+  color: inherit;
+
+  text-decoration: none;
+}
+
+/* ==========================================
+   FORM ELEMENTS
+========================================== */
+
+input,
+select,
+textarea,
+button {
+
+  font-family: inherit;
+}
+
+input,
+select,
+textarea {
+
+  background: #0f172a;
+
+  border: 1px solid var(--border);
+
+  color: white;
+
+  border-radius: 8px;
+
+  padding: 10px 12px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+
+  border-color: var(--accent);
+
+  box-shadow:
+    0 0 0 3px rgba(59,130,246,0.15);
+}
+
+button {
+
+  cursor: pointer;
+
+  border: none;
+}
+
+/* ==========================================
+   TABLES
+========================================== */
+
+table {
+
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+th {
+
+  background: #0f172a;
+
+  color: var(--text-secondary);
+
+  font-size: 12px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+}
+
+th,
+td {
+
+  padding: 14px;
+}
+
+tr {
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.05);
+}
+
+tr:hover {
+
+  background:
+    rgba(255,255,255,0.02);
+}
+
+/* ==========================================
+   SCROLLBAR
+========================================== */
+
+::-webkit-scrollbar {
+
+  width: 8px;
+
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+
+  background: #334155;
+
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+  background: #475569;
+}
+
+/* ==========================================
+   REACT FLOW
+========================================== */
+
+.react-flow {
+
+  background: #0f172a;
+}
+
+.react-flow__controls {
+
+  background: #111827 !important;
+
+  border: 1px solid #1e293b !important;
+}
+
+.react-flow__minimap {
+
+  background: #111827 !important;
+
+  border: 1px solid #1e293b !important;
+}
+
+/* ==========================================
+   SMOOTH SCROLL
+========================================== */
+
+html {
+
+  scroll-behavior: smooth;
+}

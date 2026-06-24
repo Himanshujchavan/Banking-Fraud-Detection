@@ -1,0 +1,19 @@
+/* ── App-level styles ───────────────────────────── */
+
+/* Transition for page content swap */
+main > * {
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* Recharts — hide default svg outline */
+.recharts-wrapper svg { outline: none; }
+
+/* Table hover row */
+tbody tr:hover {
+  background: rgba(0, 200, 255, 0.03) !important;
+}
