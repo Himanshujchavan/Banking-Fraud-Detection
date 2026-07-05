@@ -6,7 +6,8 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     DateTime,
-    Text
+    Text,
+    Index
 )
 
 from datetime import datetime
@@ -63,12 +64,14 @@ class Account(Base):
     account_number = Column(
         String,
         unique=True,
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     user_id = Column(
         Integer,
-        ForeignKey("users.id")
+        ForeignKey("users.id"),
+        index=True
     )
 
     balance = Column(
@@ -79,6 +82,14 @@ class Account(Base):
     is_frozen = Column(
         Boolean,
         default=False
+    )
+
+    # Updated every time this account sends or receives a transfer.
+    # Used by the dormant-account risk check and by the periodic
+    # dormant-account scan.
+    last_active = Column(
+        DateTime,
+        default=datetime.utcnow
     )
 
 
@@ -95,15 +106,15 @@ class Transaction(Base):
         primary_key=True
     )
 
-    sender_account = Column(String)
+    sender_account = Column(String, index=True)
 
-    receiver_account = Column(String)
+    receiver_account = Column(String, index=True)
 
     amount = Column(Float)
 
-    status = Column(String)
+    status = Column(String, index=True)
 
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime, index=True)
 
     is_fraud = Column(
         Boolean,
@@ -119,7 +130,15 @@ class Transaction(Base):
 
     created_at = Column(
         DateTime,
-        default=datetime.utcnow
+        default=datetime.utcnow,
+        index=True
+    )
+
+    __table_args__ = (
+        # Speeds up the mule / rapid-movement risk checks, which always
+        # filter by receiver_account (or sender_account) plus a time window.
+        Index("ix_transactions_receiver_time", "receiver_account", "timestamp"),
+        Index("ix_transactions_sender_time", "sender_account", "timestamp"),
     )
 
 
@@ -137,7 +156,7 @@ class FraudAlert(Base):
         index=True
     )
 
-    account_number = Column(String)
+    account_number = Column(String, index=True)
 
     alert_type = Column(String)
 
@@ -145,7 +164,8 @@ class FraudAlert(Base):
 
     status = Column(
         String,
-        default="OPEN"
+        default="OPEN",
+        index=True
     )
 
     assigned_to = Column(String)
@@ -191,3 +211,46 @@ class InvestigationCase(Base):
         DateTime,
         default=datetime.utcnow
     )
+
+
+# ==========================
+# Outbox Events
+# ==========================
+#
+# Transactional outbox: any code path that needs to emit an event
+# (today: fraud/transfer events) writes a row here in the SAME db
+# transaction as the business data. A separate publisher process
+# (see outbox_publisher_worker.py) polls this table and publishes to
+# Kafka. This guarantees the event is emitted if and only if the
+# business transaction actually committed, without a distributed
+# transaction across Postgres and Kafka.
+
+class OutboxEvent(Base):
+
+    __tablename__ = "outbox_events"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    # Future Kafka topic name, e.g. "transactions.created", "fraud.alerts"
+    topic = Column(String, nullable=False, index=True)
+
+    # Future Kafka partition key, e.g. an account number, so events for
+    # the same account stay ordered once this is a real topic.
+    key = Column(String, nullable=False)
+
+    # JSON-encoded event body.
+    payload = Column(Text, nullable=False)
+
+    published = Column(Boolean, default=False, index=True)
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        index=True
+    )
+
+    published_at = Column(DateTime, nullable=True)

@@ -6,8 +6,18 @@ from services.alert_service import (
     create_alert
 )
 
+# Real-time per-transaction mule checks now live in services/risk_engine.py.
+# This scan is a periodic safety net that re-aggregates recent activity —
+# it catches patterns that build up gradually across many small transfers,
+# which a single-transaction check can miss. Bounded to a recent window
+# (backed by the ix_transactions_receiver_time index) so it stays cheap
+# as the table grows, instead of scanning full transaction history.
 
-async def detect_multiple_senders(db):
+WINDOW_HOURS = 24
+SENDER_THRESHOLD = 20
+
+
+async def detect_multiple_senders(db, window_hours: int = WINDOW_HOURS):
 
     query = text("""
         SELECT
@@ -17,15 +27,21 @@ async def detect_multiple_senders(db):
 
         FROM transactions
 
+        WHERE timestamp >= NOW() - (:window_hours || ' hours')::interval
+
         GROUP BY receiver_account
 
         HAVING COUNT(
             DISTINCT sender_account
-        ) > 20
+        ) > :sender_threshold
     """)
 
     results = db.execute(
-        query
+        query,
+        {
+            "window_hours": window_hours,
+            "sender_threshold": SENDER_THRESHOLD,
+        }
     ).fetchall()
 
     alerts_created = 0

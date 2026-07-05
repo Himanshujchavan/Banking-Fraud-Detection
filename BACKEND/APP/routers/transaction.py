@@ -38,12 +38,12 @@ def get_db():
 # =====================================
 
 @router.post("/transfer")
-def transfer(
+async def transfer(
     data: TransferRequest,
     db: Session = Depends(get_db)
 ):
 
-    return transfer_money(
+    return await transfer_money(
         data.sender_account,
         data.receiver_account,
         data.amount,

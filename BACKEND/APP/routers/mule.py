@@ -36,34 +36,34 @@ def get_db():
 
 @router.post("/scan")
 
-def scan_for_mules(
+async def scan_for_mules(
     db: Session = Depends(get_db)
 ):
 
-    alerts = detect_multiple_senders(db)
-    
+    alerts = await detect_multiple_senders(db)
+
     return {
         "message": "Scan completed",
         "alerts_created": alerts
     }
 
 @router.post("/rapid-movement")
-def rapid_movement_scan(
+async def rapid_movement_scan(
     db: Session = Depends(get_db)
 ):
 
-    count = detect_rapid_movement(db)
+    count = await detect_rapid_movement(db)
 
     return {
         "alerts_created": count
     }
 
 @router.post("/dormant")
-def dormant_scan(
+async def dormant_scan(
     db: Session = Depends(get_db)
 ):
 
-    count = detect_dormant_accounts(db)
+    count = await detect_dormant_accounts(db)
 
     return {
         "alerts_created": count

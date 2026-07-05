@@ -6,8 +6,22 @@ from services.alert_service import (
     create_alert
 )
 
+# Real-time per-transaction rapid-movement checks now live in
+# services/risk_engine.py. This scan is a periodic safety net, bounded to
+# a recent window so the self-join stays cheap as the table grows instead
+# of joining the entire transaction history against itself.
 
-async def detect_rapid_movement(db):
+WINDOW_HOURS = 24
+RAPID_SECONDS = 300
+AMOUNT_TOLERANCE = 5000
+
+
+async def detect_rapid_movement(
+    db,
+    window_hours: int = WINDOW_HOURS,
+    rapid_seconds: int = RAPID_SECONDS,
+    amount_tolerance: float = AMOUNT_TOLERANCE,
+):
 
     query = text("""
         SELECT DISTINCT
@@ -19,7 +33,10 @@ async def detect_rapid_movement(db):
         ON t1.receiver_account =
            t2.sender_account
 
-        WHERE ABS(
+        WHERE t1.timestamp >= NOW() - (:window_hours || ' hours')::interval
+        AND t2.timestamp >= NOW() - (:window_hours || ' hours')::interval
+
+        AND ABS(
             EXTRACT(
                 EPOCH FROM
                 (
@@ -27,16 +44,21 @@ async def detect_rapid_movement(db):
                     t1.timestamp
                 )
             )
-        ) < 300
+        ) < :rapid_seconds
 
         AND ABS(
             t1.amount -
             t2.amount
-        ) < 5000
+        ) < :amount_tolerance
     """)
 
     results = db.execute(
-        query
+        query,
+        {
+            "window_hours": window_hours,
+            "rapid_seconds": rapid_seconds,
+            "amount_tolerance": amount_tolerance,
+        }
     ).fetchall()
 
     alerts_created = 0
@@ -60,7 +82,7 @@ async def detect_rapid_movement(db):
             db=db,
             account_number=account,
             alert_type="RAPID_MOVEMENT",
-            risk_score=90
+            risk_score=80
         )
 
         alerts_created += 1
