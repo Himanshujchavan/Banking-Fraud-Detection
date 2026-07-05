@@ -1,0 +1,122 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-fraud_bank}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Single-node Kafka in KRaft mode - no Zookeeper needed. Fine for local
+  # dev / a small deployment; a real production cluster wants 3+ brokers.
+  kafka:
+    image: bitnami/kafka:3.7
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_CFG_NODE_ID: "0"
+      KAFKA_CFG_PROCESS_ROLES: "controller,broker"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "0@kafka:9093"
+      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      AUTO_CREATE_TABLES: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  outbox-worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    command: ["python", "outbox_publisher_worker.py"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  audit-consumer:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    command: ["python", "-m", "consumers.audit_consumer"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    # Scale this independently of everything else, e.g.:
+    #   docker compose up -d --scale audit-consumer=3
+
+  case-automation-consumer:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    command: ["python", "-m", "consumers.case_automation_consumer"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  kafka_data:

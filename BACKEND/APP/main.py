@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from APP.database import Base, engine
 from APP.background_scans import periodic_scan_loop
+from APP.websocket.alert_socket import redis_listener
 
 from APP.routers import auth
 from APP.routers import account
@@ -39,14 +40,16 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
 
     scan_task = asyncio.create_task(periodic_scan_loop())
+    redis_task = asyncio.create_task(redis_listener())
 
     yield
 
-    scan_task.cancel()
-    try:
-        await scan_task
-    except asyncio.CancelledError:
-        pass
+    for task in (scan_task, redis_task):
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 app = FastAPI(

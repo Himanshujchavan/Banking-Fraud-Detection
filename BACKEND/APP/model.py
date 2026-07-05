@@ -254,3 +254,42 @@ class OutboxEvent(Base):
     )
 
     published_at = Column(DateTime, nullable=True)
+
+
+# ==========================
+# Audit Log
+# ==========================
+#
+# Populated exclusively by consumers/audit_consumer.py, reading the
+# `transactions.created` Kafka topic. Deliberately NOT written by the
+# transfer request path itself — this is a downstream, decoupled read
+# model, so a slow or temporarily-down audit consumer can never affect
+# the latency or availability of a money transfer.
+
+class AuditLog(Base):
+
+    __tablename__ = "audit_log"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    sender_account = Column(String, index=True)
+
+    receiver_account = Column(String, index=True)
+
+    amount = Column(Float)
+
+    risk_score = Column(Float, nullable=True)
+
+    # ISO timestamp string as it appeared on the Kafka event, kept
+    # separate from recorded_at (when the consumer actually wrote it).
+    event_timestamp = Column(String)
+
+    recorded_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        index=True
+    )

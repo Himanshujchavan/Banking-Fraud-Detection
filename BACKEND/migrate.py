@@ -46,10 +46,11 @@ def run():
             conn.execute(text(statement))
     print("Applied column/index migrations.")
 
-    # outbox_events is a brand new table — safe to create via metadata
-    # directly rather than hand-writing its DDL.
+    # outbox_events / audit_log are brand new tables — safe to create via
+    # metadata directly rather than hand-writing their DDL.
     Base.metadata.tables["outbox_events"].create(bind=engine, checkfirst=True)
-    print("Ensured outbox_events table exists.")
+    Base.metadata.tables["audit_log"].create(bind=engine, checkfirst=True)
+    print("Ensured outbox_events and audit_log tables exist.")
 
 
 if __name__ == "__main__":
