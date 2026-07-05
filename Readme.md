@@ -1,359 +1,221 @@
 # 🚨 AI-Powered Banking Fraud Detection & Mule Account Monitoring System
 
-## Overview
+## Problem Statement
 
-An enterprise-grade fraud detection platform designed to identify suspicious banking transactions, detect mule accounts, monitor money movement networks, and assist fraud analysts with investigation workflows.
+Banks face increasing financial fraud through:
 
-The system combines Machine Learning, Rule-Based Detection, Real-Time Alerts, Network Analysis, and Case Management to help financial institutions proactively prevent fraud.
+* Fraudulent transactions
+* Mule accounts used to move illegal funds
+* Rapid money movement between accounts
+* Dormant accounts suddenly becoming active
+* Manual fraud investigation delays
+
+This project provides an AI-powered fraud monitoring platform that detects suspicious transactions, identifies mule accounts, generates real-time alerts, and supports fraud investigation workflows.
+
+---
+
+## What I Built
+
+A full-stack fraud detection platform with:
+
+* AI-based Fraud Detection (XGBoost)
+* Mule Account Detection Engine
+* Real-Time Fraud Alerts
+* Network Analysis Dashboard
+* Investigation & Case Management System
+* Account Freeze / Unfreeze Controls
+* WebSocket-Based Live Monitoring
+* Dockerized Backend Deployment
 
 ---
 
 ## Key Features
 
-### 🤖 AI Fraud Detection Engine
+### 🤖 Fraud Detection Engine
 
-* XGBoost-based fraud prediction model
+* XGBoost-based fraud prediction
+* Fraud probability scoring
 * Risk score generation (0–100)
-* Fraud probability prediction
-* Transaction classification
-* Real-time fraud evaluation
+* Real-time transaction evaluation
 
-### 🏦 Banking Operations
+### 🚨 Mule Detection
 
-* User Registration & Authentication
-* Account Creation
-* Balance Management
-* Money Transfer Service
-* Transaction History
-
-### 🚨 Fraud Alert System
-
-Automatically generates alerts for:
-
-* Rapid Money Movement
-* Multiple Sender Activity
-* Dormant Account Reactivation
-* High-Risk ML Transactions
-
-### 🔔 Real-Time Notifications
-
-* WebSocket-powered alert broadcasting
-* Live dashboard updates
-* Instant analyst notifications
-
-### 🕵️ Investigation Workflow
-
-* Alert Review
-* Alert Resolution
-* False Positive Handling
-* Analyst Assignment
-* Investigation Notes
-
-### 📁 Case Management
-
-* Create Investigation Cases
-* Assign Fraud Analysts
-* Track Case Status
-* Store Investigation Notes
-
-### ❄️ Account Freeze System
-
-* Freeze Suspicious Accounts
-* Unfreeze Cleared Accounts
-* Prevent Transfers from Frozen Accounts
-
-### 🌐 Network Analysis
-
-Visual money-flow network displaying:
-
-* Sender → Receiver relationships
-* High-risk account clusters
-* Suspicious transaction paths
-* Mule account patterns
+* Multiple Sender Detection
+* Rapid Money Movement Detection
+* Dormant Account Detection
 
 ### 📊 Admin Dashboard
 
-Real-time statistics:
+* Transaction Monitoring
+* Fraud Analytics
+* Alert Management
+* High-Risk Account Tracking
 
-* Total Users
-* Total Accounts
-* Total Transactions
-* Fraud Transactions
-* Open Alerts
-* High-Risk Accounts
+### 🕵️ Investigation Workflow
+
+* Review Alerts
+* Resolve Alerts
+* False Positive Management
 * Investigation Cases
 
----
+### 🌐 Network Analysis
 
-# System Architecture
+Visualizes:
 
-Transaction Request
-↓
-Transfer Service
-↓
-Fraud Detection Model (XGBoost)
-↓
-Risk Score Generation
-↓
-Decision Engine
-↓
-Transaction Storage
-↓
-Alert Generation
-↓
-WebSocket Broadcast
-↓
-Admin Dashboard
-↓
-Investigation Workflow
-↓
-Freeze / Unfreeze Actions
+* Money flow between accounts
+* Suspicious transaction chains
+* High-risk account networks
 
 ---
 
-# Machine Learning Model
+## System Architecture
 
-## Algorithm
-
-* XGBoost Classifier
-
-## Features Used
-
-* Transaction Amount
-* Average Transaction Amount
-* Total Transactions
-* Average Daily Transactions
-* Beneficiary Count
-
-## Performance
-
-* Accuracy: 99.10%
-* ROC-AUC Score: 0.9802
-* Precision: 1.00
-* Recall: 0.96
-* F1 Score: 0.98
+Transaction
+→ Fraud Detection Model
+→ Risk Score Generation
+→ Alert Engine
+→ WebSocket Notification
+→ Admin Dashboard
+→ Investigation Workflow
+→ Account Freeze / Unfreeze
 
 ---
 
-# Mule Account Detection Modules
+## Tech Stack
 
-## 1. Multiple Sender Detection
-
-Flags accounts receiving money from an unusually high number of distinct senders.
-
-## 2. Rapid Movement Detection
-
-Detects money entering and leaving an account within a short time window.
-
-## 3. Dormant Account Detection
-
-Identifies dormant accounts that suddenly receive large transactions.
-
----
-
-# Technology Stack
-
-## Frontend
+### Frontend
 
 * React.js
 * React Flow
 * Recharts
 * Axios
 
-## Backend
+### Backend
 
 * FastAPI
 * SQLAlchemy
 * PostgreSQL
 * WebSockets
 
-## Machine Learning
+### Machine Learning
 
 * XGBoost
 * Scikit-Learn
 * Pandas
 * NumPy
-* Imbalanced-Learn (SMOTE)
+* SMOTE
 
-## Deployment
+### DevOps
 
-* Vercel (Frontend)
-* Railway / Render (Backend)
-* PostgreSQL / Neon DB
-
----
-
-# Database Schema
-
-## Users
-
-* id
-* username
-* email
-* password
-
-## Accounts
-
-* id
-* account_number
-* user_id
-* balance
-* is_frozen
-
-## Transactions
-
-* id
-* sender_account
-* receiver_account
-* amount
-* status
-* timestamp
-* risk_score
-* is_fraud
-
-## Fraud Alerts
-
-* id
-* account_number
-* alert_type
-* risk_score
-* status
-* assigned_to
-* remarks
-* created_at
-
-## Investigation Cases
-
-* id
-* alert_id
-* account_number
-* analyst_name
-* notes
-* status
-* created_at
+* Docker
+* GitHub
 
 ---
 
-# API Modules
+## Achievements
 
-## Authentication
+✅ AI-Powered Fraud Detection
 
-POST /register
+✅ Mule Account Detection Engine
 
-POST /login
+✅ Real-Time Alert System
 
-## Banking
+✅ Network Analysis Dashboard
 
-POST /transactions/transfer
+✅ Investigation Case Management
 
-GET /transactions/account/{account_number}
+✅ Account Freeze Protection
 
-GET /transactions/all
+✅ React + FastAPI Full-Stack Application
 
-## Fraud Detection
+✅ PostgreSQL Integration
 
-POST /predict
-
-## Admin Dashboard
-
-GET /admin/dashboard/stats
-
-GET /admin/fraud-alerts
-
-GET /admin/users
-
-GET /admin/accounts
-
-## Alert Workflow
-
-PATCH /admin/alerts/{id}/review
-
-PATCH /admin/alerts/{id}/resolve
-
-PATCH /admin/alerts/{id}/false-positive
-
-## Account Control
-
-POST /admin/freeze/{account_number}
-
-POST /admin/unfreeze/{account_number}
-
-## Mule Detection
-
-POST /mule/scan
-
-POST /mule/rapid-movement
-
-POST /mule/dormant
-
-GET /mule/top-risk
-
-GET /mule/network-analysis
+✅ Docker Containerization
 
 ---
 
-# Installation
+## Project Structure
 
-## Clone Repository
+```text
+BANKING-FRAUD-DETECTION
 
-git clone <repository-url>
+├── BACKEND
+│   ├── APP
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── fraud_model.pkl
+│
+├── FRONTEND
+│   ├── src
+│   └── package.json
+│
+└── README.md
+```
 
-cd FRAUD_DETECTION
+---
 
-## Install Dependencies
+## Run Locally
+
+### Backend
+
+```bash
+cd BACKEND
 
 pip install -r requirements.txt
 
-## Configure Environment
-
-Create a .env file:
-
-DATABASE_URL=postgresql://username:password@localhost/fraud_db
-
-SECRET_KEY=your_secret_key
-
-## Run Backend
-
 uvicorn APP.main:app --reload
+```
 
-Backend URL:
+Swagger Docs:
 
-http://localhost:8000
-
-Swagger Documentation:
-
+```text
 http://localhost:8000/docs
+```
 
-## Run Frontend
+### Frontend
+
+```bash
+cd FRONTEND
 
 npm install
 
 npm run dev
-
-Frontend URL:
-
-http://localhost:5173
+```
 
 ---
 
-# Future Enhancements
+## Docker Setup
+
+Build Image:
+
+```bash
+docker build -t fraud-backend .
+```
+
+Run Container:
+
+```bash
+docker run -p 8000:8000 fraud-backend
+```
+
+---
+
+## Future Improvements
 
 * Device Fingerprinting
 * Geo-Location Risk Analysis
 * Behavioral Biometrics
-* OTP Verification Workflow
-* Face Verification Integration
+* OTP Verification
+* Face Verification
 * Kafka Event Streaming
-* Real-Time Risk Scoring Pipeline
-* SIEM Integration
 
 ---
 
-# Author
+## Author
 
-Himanshu Chavan
+**Himanshu Chavan**
 
-Computer Science Engineering
+Computer Science Engineering, YCCE Nagpur
 
-YCCE Nagpur
+
 
